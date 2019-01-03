@@ -30,7 +30,7 @@ export default class Command {
 	 *
 	 * @param {module:core/editor/editor~Editor} editor Editor on which this command will be used.
 	 */
-	constructor( editor ) {
+	constructor( editor, enabledInReadOnly = false ) {
 		/**
 		 * The editor on which this command will be used.
 		 *
@@ -110,15 +110,17 @@ export default class Command {
 		}, { priority: 'high' } );
 
 		// By default commands are disabled when the editor is in read-only mode.
-		this.listenTo( editor, 'change:isReadOnly', ( evt, name, value ) => {
-			if ( value ) {
-				this.on( 'set:isEnabled', forceDisable, { priority: 'highest' } );
-				this.isEnabled = false;
-			} else {
-				this.off( 'set:isEnabled', forceDisable );
-				this.refresh();
-			}
-		} );
+		if ( !enabledInReadOnly ) {
+			this.listenTo( editor, 'change:isReadOnly', ( evt, name, value ) => {
+				if ( value ) {
+					this.on( 'set:isEnabled', forceDisable, { priority: 'highest' } );
+					this.isEnabled = false;
+				} else {
+					this.off( 'set:isEnabled', forceDisable );
+					this.refresh();
+				}
+			} );
+		}
 	}
 
 	/**
